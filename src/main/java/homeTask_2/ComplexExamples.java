@@ -5,11 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-//import static java.util.stream.Collectors.groupingBy;
 
 /**
  * Класс описыващее задачу от автора
@@ -62,6 +59,11 @@ public class ComplexExamples {
             new Person(7, "Amelia"),
             new Person(8, "Amelia"),
     };
+
+    private static int[] ARRAYFORTASKTWO1 = new int[]{3, 4, 2, 7};
+    private static int[] ARRAYFORTASKTWO2 = new int[]{7, 4, 3, 3};
+    private static int[] ARRAYFORTASKTWO3 = new int[]{1, 9, 7, 3};
+    private static int[] ARRAYFORTASKTWO4 = new int[]{7, 4, 1, 2, 15, 8, 6, 13};
         /*  Raw data:
 
         0 - Harry
@@ -129,7 +131,7 @@ public class ComplexExamples {
         /*
         Task2
 
-            [3, 4, 2, 7], 10 -> [3, 7] - вывести пару менно в скобках, которые дают сумму - 10
+            [3, 4, 2, 7], 10 -> [3, 7] - вывести пару именно в скобках, которые дают сумму - 10
          */
 
 
@@ -147,28 +149,50 @@ public class ComplexExamples {
          */
 
         //вывод 1го задания на экран
-        printValues(removeDublicateAndSortedHasMap(RAW_DATA));
+        System.out.println("task1");
+        printValuesInHasMap(removeDublicateAndSortedHasMap(RAW_DATA));
+        System.out.println("**************************************************");
+
+        //вывод 2го задания на экран
+        System.out.println("task2");
+        printValuesInArray(pairSumTen(ARRAYFORTASKTWO1, 10));
+        printValuesInArray(pairSumTen(ARRAYFORTASKTWO2, 10));
+        printValuesInArray(pairSumTen(ARRAYFORTASKTWO3, 10));
+        printValuesInArray(pairSumTen(ARRAYFORTASKTWO4, 10));
+        System.out.println("**************************************************");
+
+        //вывод 3го задания
+        System.out.println("task3");
+        System.out.println(fuzzySearch("car", "ca6$$#_rtwheel")); // true
+        System.out.println(fuzzySearch("cwhl", "cartwheel")); // true
+        System.out.println(fuzzySearch("cwhee", "cartwheel")); // true
+        System.out.println(fuzzySearch("cartwheel", "cartwheel")); // true
+        System.out.println(fuzzySearch("cwheeel", "cartwheel")); // false
+        System.out.println(fuzzySearch("lw", "cartwheel")); // false
 
     }
 
     /**
+     * Для 1 задания
      * Метод удаляет дублирующиеся значения , добавляет в хешмапу ИМЯ:КОЛИЧЕСТВО ВХОЖДЕНИЙ ПО ИМЕНИ и группирует по имени
-     * @param RAW_DATA
+     *
+     * @param RAW_DATA массив из Person
+     * @return отсориторванная hashmap с уникальными значениями и числом вхождений по имени
      */
     public static Map<String, Integer> removeDublicateAndSortedHasMap(Person[] RAW_DATA) {
+        System.out.println("method removeDublicateAndSortedHasMap");
+
         List<Person> personList = new ArrayList<Person>(Arrays.asList(RAW_DATA));
 
         //map для осториторванных по имени
         Map<String, Integer> result = new LinkedHashMap<>();
 
         List<Person> finalPersonList = personList;
-        personList.stream().distinct().sorted(Comparator.comparing(e -> e.getName())).map(elem -> {
-            long count = finalPersonList.stream().distinct().filter(elem2 -> elem2.getName().equals(elem.getName())).count();
+        personList.stream().filter(Objects::nonNull).distinct().sorted(Comparator.comparing(e -> e.getName())).map(elem -> {
+            long count = finalPersonList.stream().distinct().filter(elem2 -> elem2.getName().equals(elem.getName())).count(); //число вхождений по имени
             result.put(elem.getName(), (int) count);
             return elem;
         }).collect(Collectors.toList());
-
-        System.out.println("method removeDublicate");
 
         return result;
     }
@@ -176,11 +200,89 @@ public class ComplexExamples {
 
     /**
      * Вывод значений hasmap на экран
+     *
      * @param map
      */
-    public static void printValues(Map<String, Integer> map) {
+    public static void printValuesInHasMap(Map<String, Integer> map) {
         for (Map.Entry<String, Integer> pair : map.entrySet()) {
             System.out.println("Key: " + pair.getKey() + "\nValue: " + pair.getValue());
         }
     }
+
+    /**
+     * Для 2 задания
+     *
+     * @param array-        массив с целыми числами
+     * @param sum-требуемая сумма для 2х чисел
+     * @return массив дающий сумму 10 в строгой последовательности как в исходном
+     * если в массиве встретилось 2 пары дающие 10 в сумме,вывод будет на первую найденную
+     */
+    public static int[] pairSumTen(int[] array, int sum) {
+        int[] result = new int[2];
+        for (int i = 0; i < array.length; i++) {
+            for (int j = i + 1; j < array.length; j++) {
+                if (array[i] + array[j] == sum) {
+                    result[0] = array[i];
+                    result[1] = array[j];
+                }
+                if (result[0] != 0 && result[1] != 0) {
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * вывод на экран пары значений дающих в сумме 10 в виде [3, 7]
+     */
+    public static void printValuesInArray(int[] array) {
+        StringBuilder str = new StringBuilder();
+        str.append("[");
+        for (int i = 0; i < array.length; i++) {
+            str.append(array[i]);
+            if (i != array.length - 1) {
+                str.append(",");
+            }
+        }
+        str.append("]");
+        System.out.println(str.toString());
+    }
+
+    /**
+     * Для 3 задания
+     *
+     * @param pattern -искомые буквы
+     * @param string  -место поиска
+     * @return true если в string содержаться буквы в строгой последовательности как в pattern
+     */
+    public static boolean fuzzySearch(String pattern, String string) {
+
+        //преобразую string в списко для удобства манипулирования
+        List<Character> patternCharList = pattern.chars().mapToObj(e -> (char) e).collect(Collectors.toList());
+        List<Character> stringCharList = string.chars().mapToObj(e -> (char) e).collect(Collectors.toList());
+        //эти списки необходимы для итерации и удаления
+        List<Character> patternCheckList = new ArrayList<>(patternCharList);
+        List<Character> stringCheckList = new ArrayList<>(stringCharList);
+
+        int indexChar = 0;
+
+        for (int i = 0; i < patternCharList.size(); i++) {
+            for (int j = 0; j < stringCharList.size(); j++) {
+                if (stringCharList.get(j) == patternCharList.get(i)) {
+                    if (indexChar <= j) {//если индекс настоящего удаления меньше предидущего-то буквы уже не сохраняют порядок как в патерне-return false
+                        indexChar = j;
+                        patternCheckList.remove(patternCharList.get(i));
+                        if (stringCheckList.remove(stringCharList.get(j))) {//если удаляемого элемента нет в списке- количество букв как в патерне не достает return false
+                            break;
+                        } else return false;
+                    } else return false;
+                }
+            }
+        }
+        if (patternCheckList.isEmpty())
+            return true; //если к концу итерации прошли по всем елементам patternCharList то нашли все буквы в string
+        else return false;
+    }
+
 }
