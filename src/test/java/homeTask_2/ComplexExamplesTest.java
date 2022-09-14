@@ -49,12 +49,12 @@ class ComplexExamplesTest {
         int[] array1 = new int[]{3, 4, 2, 7};
         int[] array2 = new int[]{7, 4, 3, 3};
         int[] array3 = new int[]{1, 9, 7, 3};
-        int[] array4 = new int[]{7, 4, 1, 2, 15, 8, 6, 13};
+        int[] array4 = new int[]{7, 4, 1, 2, 15, 8, 6,3, 13};
 
         int[] expected1 = new int[]{3, 7};
         int[] expected2 = new int[]{7, 3};
         int[] expected3 = new int[]{1, 9};
-        int[] expected4 = new int[]{4, 6};
+        int[] expected4 = new int[]{2, 8};
 
         int[] actual1 = ComplexExamples.pairSumTen(array1, sum);
         int[] actual2 = ComplexExamples.pairSumTen(array2, sum);

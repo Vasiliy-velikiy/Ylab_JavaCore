@@ -63,7 +63,7 @@ public class ComplexExamples {
     private static int[] ARRAYFORTASKTWO1 = new int[]{3, 4, 2, 7};
     private static int[] ARRAYFORTASKTWO2 = new int[]{7, 4, 3, 3};
     private static int[] ARRAYFORTASKTWO3 = new int[]{1, 9, 7, 3};
-    private static int[] ARRAYFORTASKTWO4 = new int[]{7, 4, 1, 2, 15, 8, 6, 13};
+    private static int[] ARRAYFORTASKTWO4 = new int[]{7, 4, 1, 2, 15, 8, 6, 3, 13};
         /*  Raw data:
 
         0 - Harry
@@ -181,19 +181,9 @@ public class ComplexExamples {
      */
     public static Map<String, Integer> removeDublicateAndSortedHasMap(Person[] RAW_DATA) {
         System.out.println("method removeDublicateAndSortedHasMap");
-
-        List<Person> personList = new ArrayList<Person>(Arrays.asList(RAW_DATA));
-
-        //map для осториторванных по имени
-        Map<String, Integer> result = new LinkedHashMap<>();
-
-        List<Person> finalPersonList = personList;
-        personList.stream().filter(Objects::nonNull).distinct().sorted(Comparator.comparing(e -> e.getName())).map(elem -> {
-            long count = finalPersonList.stream().distinct().filter(elem2 -> elem2.getName().equals(elem.getName())).count(); //число вхождений по имени
-            result.put(elem.getName(), (int) count);
-            return elem;
-        }).collect(Collectors.toList());
-
+        Map<String, Integer> result = new TreeMap<>();
+                                               // проверка на null
+        Arrays.stream(RAW_DATA).filter(Objects::nonNull).filter(person -> person.getName() != null).distinct().forEach(person -> result.merge(person.getName(), 1, Integer::sum));
         return result;
     }
 
@@ -204,9 +194,7 @@ public class ComplexExamples {
      * @param map
      */
     public static void printValuesInHasMap(Map<String, Integer> map) {
-        for (Map.Entry<String, Integer> pair : map.entrySet()) {
-            System.out.println("Key: " + pair.getKey() + "\nValue: " + pair.getValue());
-        }
+        map.forEach((key, value) -> System.out.println("Key: " + key + "\nValue: " + value));
     }
 
     /**
@@ -218,19 +206,16 @@ public class ComplexExamples {
      * если в массиве встретилось 2 пары дающие 10 в сумме,вывод будет на первую найденную
      */
     public static int[] pairSumTen(int[] array, int sum) {
-        int[] result = new int[2];
-        for (int i = 0; i < array.length; i++) {
-            for (int j = i + 1; j < array.length; j++) {
-                if (array[i] + array[j] == sum) {
-                    result[0] = array[i];
-                    result[1] = array[j];
-                }
-                if (result[0] != 0 && result[1] != 0) {
-                    return result;
-                }
+        HashMap<Integer, Integer> map = new HashMap<>();//ключ,значение-само число из массива
+        int[] arrayNotNull = Arrays.stream(array).filter(Objects::nonNull).toArray(); //проверка на null
+        for (int i = 0; i < arrayNotNull.length; i++) {
+            if (map.get(sum - arrayNotNull[i]) == null) {
+                map.put(arrayNotNull[i], arrayNotNull[i]);
+            } else {
+                return new int[]{map.get(sum - arrayNotNull[i]), arrayNotNull[i]};
             }
         }
-        return result;
+        return new int[2];
     }
 
     /**
@@ -257,32 +242,18 @@ public class ComplexExamples {
      * @return true если в string содержаться буквы в строгой последовательности как в pattern
      */
     public static boolean fuzzySearch(String pattern, String string) {
-
-        //преобразую string в списко для удобства манипулирования
-        List<Character> patternCharList = pattern.chars().mapToObj(e -> (char) e).collect(Collectors.toList());
-        List<Character> stringCharList = string.chars().mapToObj(e -> (char) e).collect(Collectors.toList());
-        //эти списки необходимы для итерации и удаления
-        List<Character> patternCheckList = new ArrayList<>(patternCharList);
-        List<Character> stringCheckList = new ArrayList<>(stringCharList);
-
-        int indexChar = 0;
-
-        for (int i = 0; i < patternCharList.size(); i++) {
-            for (int j = 0; j < stringCharList.size(); j++) {
-                if (stringCharList.get(j) == patternCharList.get(i)) {
-                    if (indexChar <= j) {//если индекс настоящего удаления меньше предидущего-то буквы уже не сохраняют порядок как в патерне-return false
-                        indexChar = j;
-                        patternCheckList.remove(patternCharList.get(i));
-                        if (stringCheckList.remove(stringCharList.get(j))) {//если удаляемого элемента нет в списке- количество букв как в патерне не достает return false
-                            break;
-                        } else return false;
-                    } else return false;
+        if (pattern != null && string != null) { //проверка на null
+            int indexChar = -2;//;
+            for (char elem : pattern.toCharArray()) {
+                if (indexChar > string.indexOf(elem) || string.indexOf(elem) == -1) return false;
+                else {
+                    indexChar = string.indexOf(elem);
+                    string = string.replaceFirst(String.valueOf(string.charAt(indexChar)), ""); //по очереди удаляем символи в искомой строке
                 }
             }
-        }
-        if (patternCheckList.isEmpty())
-            return true; //если к концу итерации прошли по всем елементам patternCharList то нашли все буквы в string
-        else return false;
+            return true;
+        } else return false;
     }
 
 }
+
